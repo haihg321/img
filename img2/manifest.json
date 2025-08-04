@@ -6,11 +6,10 @@
   "permissions": [
     "activeTab", 
     "scripting", 
-    "downloads",
-    "<all_urls>"
+    "downloads"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "*://*/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -30,6 +29,6 @@
   },
   "web_accessible_resources": [{
     "resources": ["icons/image-error.png"],
-    "matches": ["<all_urls>"]
+    "matches": ["*://*/*"]
   }]
 }
