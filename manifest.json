@@ -1,9 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Image Collector Pro",
-  "version": "2.0",
+  "version": "2.1",
   "description": "Advanced image collection and download tool",
-  "permissions": ["activeTab", "downloads"],
+  "permissions": [
+    "activeTab", 
+    "downloads",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png"
