@@ -1,9 +1,17 @@
 {
   "manifest_version": 3,
   "name": "Image Collector Pro",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Download images from any website with resolution filtering and format conversion",
-  "permissions": ["activeTab", "scripting", "downloads"],
+  "permissions": [
+    "activeTab", 
+    "scripting", 
+    "downloads",
+    "<all_urls>"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -19,5 +27,9 @@
   },
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["icons/image-error.png"],
+    "matches": ["<all_urls>"]
+  }]
 }
