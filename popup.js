@@ -1,119 +1,40 @@
-let currentTab = null;
-let allImages = [];
-let selectedImages = new Set();
-
-async function init() {
-  try {
-    [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!currentTab?.id) {
-      showError("No active tab found");
-      return;
-    }
-    await loadImages();
-  } catch (error) {
-    showError("Failed to initialize: " + error.message);
-  }
-}
+// ... (phần trên giữ nguyên)
 
 async function loadImages() {
   const imageList = document.getElementById('imageList');
   try {
-    imageList.innerHTML = '<div class="p-4 text-center text-gray-500">Loading images...</div>';
+    imageList.innerHTML = '<div class="p-4 text-center text-gray-500">Scanning images...</div>';
     
-    // Inject content script if not already injected
-    await chrome.scripting.executeScript({
-      target: { tabId: currentTab.id },
-      files: ['content.js']
-    });
+    // First try to execute content script
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: currentTab.id },
+        files: ['content.js']
+      });
+    } catch (e) {
+      console.log('Content script injection error:', e);
+    }
 
-    // Give content script time to initialize
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Wait for content script to initialize
+    await new Promise(resolve => setTimeout(resolve, 300));
     
-    const response = await chrome.tabs.sendMessage(currentTab.id, { action: "getImages" });
-    if (!response?.images) {
-      throw new Error("No images received");
+    // Try to get images with timeout
+    const response = await Promise.race([
+      chrome.tabs.sendMessage(currentTab.id, { action: "getImages" }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+    ]);
+    
+    if (!response?.images?.length) {
+      throw new Error(response?.error || 'No images found on this page');
     }
     
     allImages = response.images;
     renderImages();
+    
   } catch (error) {
-    console.error("Load images error:", error);
-    showError("Failed to load images. Please refresh the page and try again.");
+    console.error("Image load error:", error);
+    showError(`Error: ${error.message}. Try refreshing the page.`);
   }
 }
 
-function showError(message) {
-  document.getElementById('imageList').innerHTML = `
-    <div class="p-4 text-center text-red-500">
-      ${message}
-    </div>
-  `;
-}
-
-// ... (giữ nguyên các hàm renderImages, updateSelection, updateDownloadButton)
-
-// Download selected images
-document.getElementById('downloadBtn').addEventListener('click', async () => {
-  const format = document.getElementById('format').value;
-  const downloadBtn = document.getElementById('downloadBtn');
-  
-  downloadBtn.disabled = true;
-  downloadBtn.textContent = 'Downloading...';
-  
-  try {
-    for (const src of selectedImages) {
-      try {
-        await downloadImage(src, format);
-      } catch (error) {
-        console.error(`Failed to download ${src}:`, error);
-      }
-    }
-  } finally {
-    window.close();
-  }
-});
-
-async function downloadImage(src, format) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    
-    img.onload = function() {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            reject(new Error("Failed to create blob"));
-            return;
-          }
-          
-          const filename = src.split('/').pop().split('?')[0];
-          const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
-          const newFilename = `${nameWithoutExt}.${format}`;
-          
-          const blobUrl = URL.createObjectURL(blob);
-          chrome.downloads.download({
-            url: blobUrl,
-            filename: newFilename,
-            conflictAction: 'uniquify'
-          }, () => {
-            URL.revokeObjectURL(blobUrl);
-            resolve();
-          });
-        }, `image/${format}`, 0.92);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = src;
-  });
-}
-
-// ... (phần còn lại giữ nguyên)
+// ... (phần dưới giữ nguyên)

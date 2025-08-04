@@ -1,31 +1,58 @@
-// Auto-inject content script when page loads
+// Improved image collection with better error handling
 function collectImages() {
-  return Array.from(document.images)
-    .filter(img => img.src && img.src.startsWith('http'))
-    .map(img => ({
-      src: img.src,
-      alt: img.alt || '',
-      width: img.naturalWidth,
-      height: img.naturalHeight,
-      area: img.naturalWidth * img.naturalHeight
-    }));
+  try {
+    const images = Array.from(document.images);
+    const results = [];
+    
+    for (const img of images) {
+      try {
+        if (img.src && img.src.startsWith('http')) {
+          results.push({
+            src: img.src,
+            alt: img.alt || '',
+            width: img.naturalWidth || img.width,
+            height: img.naturalHeight || img.height,
+            area: (img.naturalWidth || img.width) * (img.naturalHeight || img.height)
+          });
+        }
+      } catch (e) {
+        console.warn('Error processing image:', e);
+      }
+    }
+    return results;
+  } catch (error) {
+    console.error('Collection error:', error);
+    return [];
+  }
 }
 
-// Send images when popup requests them
+// Enhanced message handling
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "getImages") {
-    sendResponse({ images: collectImages() });
+    sendResponse({ 
+      success: true,
+      images: collectImages(),
+      tabId: sender.tab.id 
+    });
   }
-  return true;
+  return true; // Keep port open for async response
 });
 
-// Auto-refresh when page changes (SPA support)
-let lastUrl = location.href;
-new MutationObserver(() => {
-  if (location.href !== lastUrl) {
-    lastUrl = location.href;
-    setTimeout(() => {
-      chrome.runtime.sendMessage({ action: "pageChanged" });
-    }, 1000);
+// More reliable SPA detection
+let lastHref = location.href;
+const observer = new MutationObserver(() => {
+  if (location.href !== lastHref) {
+    lastHref = location.href;
+    chrome.runtime.sendMessage({ 
+      action: "pageChanged",
+      href: location.href
+    });
   }
-}).observe(document, { subtree: true, childList: true });
+});
+
+observer.observe(document, {
+  subtree: true,
+  childList: true,
+  attributes: true,
+  characterData: true
+});
