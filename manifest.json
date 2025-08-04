@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Image Collector",
-  "version": "1.0",
-  "description": "Extension để bắt và lưu hình ảnh từ trang web",
+  "name": "Image Collector Pro",
+  "version": "2.0",
+  "description": "Advanced image collection and download tool",
   "permissions": ["activeTab", "downloads"],
   "action": {
     "default_popup": "popup.html",
@@ -16,7 +16,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_end"
     }
   ]
 }
