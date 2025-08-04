@@ -1,55 +1,56 @@
-function collectImages() {
-  try {
-    const images = Array.from(document.images);
-    const results = [];
-    
-    for (const img of images) {
-      try {
-        if (img.src && img.src.startsWith('http')) {
-          results.push({
-            src: img.src,
-            alt: img.alt || '',
-            width: img.naturalWidth || img.width,
-            height: img.naturalHeight || img.height,
-            area: (img.naturalWidth || img.width) * (img.naturalHeight || img.height)
-          });
-        }
-      } catch (e) {
-        console.warn('Error processing image:', e);
-      }
-    }
-    return results;
-  } catch (error) {
-    console.error('Collection error:', error);
-    return [];
-  }
-}
+// Selection mode
+let selectionActive = false;
+let selectedElements = [];
 
+// Toggle selection mode
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "getImages") {
-    sendResponse({ 
-      success: true,
-      images: collectImages(),
-      tabId: sender.tab.id 
-    });
+  if (request.action === "toggleSelection") {
+    selectionActive = !selectionActive;
+    document.body.style.cursor = selectionActive ? "crosshair" : "";
+    if (!selectionActive) {
+      highlightSelectedElements();
+    }
+    sendResponse({ status: selectionActive });
   }
   return true;
 });
 
-let lastHref = location.href;
-const observer = new MutationObserver(() => {
-  if (location.href !== lastHref) {
-    lastHref = location.href;
-    chrome.runtime.sendMessage({ 
-      action: "pageChanged",
-      href: location.href
-    });
+// Element selection logic
+document.addEventListener('click', (e) => {
+  if (!selectionActive) return;
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const element = e.target.closest('img');
+  if (element) {
+    element.classList.toggle('image-selector-selected');
+    const index = selectedElements.indexOf(element);
+    if (index === -1) {
+      selectedElements.push(element);
+    } else {
+      selectedElements.splice(index, 1);
+    }
   }
-});
+}, true);
 
-observer.observe(document, {
-  subtree: true,
-  childList: true,
-  attributes: true,
-  characterData: true
-});
+// Get high-res image URLs
+function getSelectedImages() {
+  return selectedElements.map(img => {
+    // Try to find high-res version
+    let src = img.src;
+    if (img.dataset.src) src = img.dataset.src; // For lazy-loaded images
+    if (img.srcset) {
+      // Get largest image from srcset
+      const sources = img.srcset.split(',')
+        .map(s => s.trim().split(' '))
+        .sort((a, b) => parseInt(b[1]) - parseInt(a[1]));
+      if (sources.length) src = sources[0][0];
+    }
+    return {
+      src: src,
+      alt: img.alt,
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight
+    };
+  });
+}

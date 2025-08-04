@@ -1,15 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Image Collector Pro",
-  "version": "2.3",
-  "description": "Advanced image collection and download tool",
+  "name": "E-Commerce Image Extractor",
+  "version": "3.0",
+  "description": "Extract high-quality product images from e-commerce sites",
   "permissions": [
     "activeTab",
-    "scripting", 
-    "downloads"
-  ],
-  "host_permissions": [
-    "<all_urls>"
+    "scripting",
+    "downloads",
+    "storage"
   ],
   "background": {
     "service_worker": "js/background.js"
@@ -18,16 +16,9 @@
     "default_popup": "popup.html",
     "default_icon": "images/icon.png"
   },
-  "icons": {
-    "16": "images/icon.png",
-    "48": "images/icon.png",
-    "128": "images/icon.png"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["js/content.js"],
-      "run_at": "document_end"
-    }
-  ]
+  "content_scripts": [{
+    "matches": ["*://*/*"],
+    "js": ["js/content.js"],
+    "css": ["css/content.css"]
+  }]
 }

@@ -1,0 +1,19 @@
+.image-selector-selected {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 2px;
+  position: relative;
+}
+
+.image-selector-selected::after {
+  content: "✓";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #3b82f6;
+  color: white;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-size: 14px;
+}
