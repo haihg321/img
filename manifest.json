@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Image Collector",
+  "version": "1.0",
+  "description": "Extension để bắt và lưu hình ảnh từ trang web",
+  "permissions": ["activeTab", "downloads"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
