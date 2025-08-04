@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Collector Pro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="glass-container">
+    <h1 class="title">Image Collector Pro</h1>
+    
+    <div class="filter-section">
+      <label for="resolution">Resolution:</label>
+      <select id="resolution" class="glass-select">
+        <option value="all">All Resolutions</option>
+        <option value="high">High (≥ 1000px)</option>
+        <option value="medium">Medium (500-999px)</option>
+        <option value="low">Low (< 500px)</option>
+      </select>
+    </div>
+    
+    <div class="filter-section">
+      <label for="format">Convert to:</label>
+      <select id="format" class="glass-select">
+        <option value="original">Original Format</option>
+        <option value="png">PNG</option>
+        <option value="jpeg">JPEG</option>
+        <option value="webp">WebP</option>
+      </select>
+    </div>
+    
+    <button id="scanBtn" class="glass-button">Scan Page</button>
+    
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Scanning images...</p>
+    </div>
+    
+    <div id="results" class="results hidden">
+      <div class="stats">
+        <span id="imageCount">0 images found</span>
+        <span id="totalSize">0 MB</span>
+      </div>
+      
+      <div id="imageList" class="image-list"></div>
+      
+      <div class="actions">
+        <button id="downloadAllBtn" class="glass-button">Download All</button>
+        <button id="downloadSelectedBtn" class="glass-button secondary">Download Selected</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
