@@ -2,6 +2,7 @@
   outline: 3px solid #3b82f6 !important;
   outline-offset: 2px;
   position: relative;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.3);
 }
 
 .image-selector-selected::after {
@@ -16,4 +17,5 @@
   text-align: center;
   line-height: 20px;
   font-size: 14px;
+  z-index: 9999;
 }

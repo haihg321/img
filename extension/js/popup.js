@@ -8,8 +8,14 @@ document.getElementById('selectBtn').addEventListener('click', async () => {
     action: "toggleSelection" 
   });
   
-  if (status) {
-    // Get selected images when selection mode is turned off
+  // Update button text
+  const btn = document.getElementById('selectBtn');
+  btn.textContent = status ? 
+    "Finish Selection (click here when done)" : 
+    "Select Images (Drag to select area)";
+  
+  // Only fetch images when ending selection
+  if (!status) {
     const images = await chrome.tabs.sendMessage(tab.id, {
       action: "getSelectedImages"
     });
